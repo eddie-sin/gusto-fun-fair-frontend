@@ -10,5 +10,13 @@ export default defineConfig({
   server: isCodexSeatbeltSandbox
     ? { watch: { useFsEvents: false, usePolling: true } }
     : undefined,
+  environments: {
+    client: {
+      // Vinext dynamically imports navigation exports. Preserve their names when
+      // Rolldown shares code with the browser entry; otherwise production links
+      // fail with `navigateClientSide/getPrefetchInterceptionContext is not a function`.
+      build: { rolldownOptions: { preserveEntrySignatures: 'strict' } },
+    },
+  },
   plugins: [vinext()],
 });

@@ -55,9 +55,24 @@ inside it. No root-project `.env.local` or source files are needed at runtime.
 A frontend-only local production preview will serve pages, but `/api` needs the
 reverse proxy and running backend for login, ordering and uploads to work.
 
-Before event deployment, check direct visits and refreshes on detail routes,
-login, checkout, proof upload and protected order access through the final
-HTTPS reverse proxy. No AWS resources are created by these build commands.
+Before event deployment, test the **production build**, not only `npm run dev`:
+
+1. Run `npm run build`, then `PORT=3100 npm start` and open `http://localhost:3100`.
+2. Click Home → Food → Stalls, then use browser Back and Forward. Verify both
+   the URL and page content change, without a full-page refresh being needed.
+3. Check Orders while logged out, Memories, Crush Letters, Log in, and the team
+   link in the footer. Check the browser console for navigation/prefetch errors.
+4. Through the final HTTPS reverse proxy, check direct visits and refreshes on
+   detail routes, login, checkout, proof upload and protected order access.
+
+The client build explicitly uses Rolldown `preserveEntrySignatures: 'strict'`.
+With the pinned Vinext/Vite versions, the default production chunk optimization
+can merge the navigation module into the browser entry without preserving the
+named exports expected by Vinext's dynamic imports. This breaks link clicks and
+prefetching even though development and direct page requests work. Keep this
+setting until an upgraded toolchain passes the production navigation checks above.
+
+No AWS resources are created by these build commands.
 
 ## Organiser-owned event copy
 
