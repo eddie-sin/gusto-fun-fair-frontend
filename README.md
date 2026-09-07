@@ -87,7 +87,9 @@ The public event name, physical date, time and place intentionally live in `lib/
 - `/orders` and `/orders/[id]`
 - `/profile`
 
-Run `npm run lint` and `npm run build` before shipping changes.
+Run `npm run test:api`, `npm run lint` and `npm run build` before shipping changes.
+
+Payment-proof uploads retain the selected receipt on failure. Busy/rate-limited responses show the server-provided retry countdown, and uploads are only resent when the student clicks again. The frontend reads `Retry-After` or the JSON retry delay; the backend enforces the actual limits.
 
 ## Working together with Git
 

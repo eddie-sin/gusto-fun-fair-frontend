@@ -2166,3 +2166,5 @@ h3 {
 @media (max-width: 600px) {
   .payment-help-dialog[data-slot="dialog-content"] { padding: 1.25rem; }
 }
+
+.payment-upload-feedback { display: block; margin: 1rem 0; }

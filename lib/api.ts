@@ -3,7 +3,24 @@ export const API_BASE_URL = configuredBase.replace(/\/$/, '');
 
 export class ApiError extends Error {
   status: number;
-  constructor(message: string, status = 0) { super(message); this.name = 'ApiError'; this.status = status; }
+  code?: string;
+  retryAfterSeconds?: number;
+  constructor(message: string, status = 0, options: { code?: string; retryAfterSeconds?: number } = {}) {
+    super(message); this.name = 'ApiError'; this.status = status;
+    this.code = options.code; this.retryAfterSeconds = options.retryAfterSeconds;
+  }
+}
+
+export function retryAfterSeconds(value: string | null, fallback?: number): number | undefined {
+  if (value?.trim()) {
+    const trimmed = value.trim();
+    const seconds = /^\d+$/.test(trimmed)
+      ? Number(trimmed)
+      : Math.ceil((Date.parse(trimmed) - Date.now()) / 1000);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(86400, seconds);
+  }
+  return typeof fallback === 'number' && Number.isFinite(fallback) && fallback >= 0
+    ? Math.min(86400, Math.ceil(fallback)) : undefined;
 }
 
 const inFlight = new Map<string, Promise<unknown>>();
@@ -27,8 +44,11 @@ export async function apiRequest<T>(path: string, options: RequestInit & { token
       throw new ApiError('The server could not be reached. Check your connection and try again.');
     }
     const contentType = response.headers.get('content-type') || '';
-    const body = contentType.includes('application/json') ? await response.json() as { error?: { message?: string } } : null;
-    if (!response.ok) throw new ApiError(body?.error?.message || 'Something went wrong. Please try again.', response.status);
+    const body = contentType.includes('application/json') ? await response.json() as { error?: { message?: string; details?: { code?: string; retryAfterSeconds?: number } } } : null;
+    if (!response.ok) throw new ApiError(body?.error?.message || 'Something went wrong. Please try again.', response.status, {
+      code: body?.error?.details?.code,
+      retryAfterSeconds: retryAfterSeconds(response.headers.get('Retry-After'), body?.error?.details?.retryAfterSeconds),
+    });
     return body as T;
   })();
 
