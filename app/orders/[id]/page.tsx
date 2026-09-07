@@ -6,8 +6,10 @@ import { ArrowLeft, Check, Clock3, Copy, RefreshCw, TicketCheck, Upload } from '
 import { useParams } from 'next/navigation';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/components/app-provider';
+import { PaymentGuide } from '@/components/payment-guide';
+import { OrderFoodSummary } from '@/components/order-food-summary';
 import { RequireAuth } from '@/components/require-auth';
-import { apiRequest, formatDateTime, formatMoney } from '@/lib/api';
+import { apiRequest, formatDateTime } from '@/lib/api';
 import { orderStatus } from '@/lib/order-display';
 import type { CheckoutPayment, Order, Ticket } from '@/lib/types';
 
@@ -33,8 +35,13 @@ export default function OrderDetailPage() {
     try {
       const orderResult = await apiRequest<{ order: Order }>(`/orders/${id}`, { token: auth.token, dedupe: true });
       setOrder(orderResult.order);
-      const local = localStorage.getItem(`gff.checkout.${id}`);
-      if (local) setCheckout(JSON.parse(local));
+      // A cached checkout must belong to this order; missing/bad storage must not hide the order.
+      setCheckout(undefined);
+      try {
+        const local = localStorage.getItem(`gff.checkout.${id}`);
+        const saved: CheckoutPayment | undefined = local ? JSON.parse(local) : undefined;
+        if (saved?.reference === orderResult.order.paymentReference) setCheckout(saved);
+      } catch { /* The guide explains how to obtain missing recipient details. */ }
       if (['PAYMENT_DECLARED','PAYMENT_SUBMITTED','PAYMENT_REUPLOAD_REQUESTED','PAYMENT_APPROVED','PAYMENT_REJECTED'].includes(orderResult.order.status)) {
         try { const result = await apiRequest<{ payment: PaymentRecord }>(`/payments/orders/${id}`, { token: auth.token, dedupe: true }); setPayment(result.payment); } catch { /* Payment may not exist until first proof. */ }
       }
@@ -50,7 +57,7 @@ export default function OrderDetailPage() {
   const declarePayment = async () => {
     if (!auth || !order) return;
     setWorking(true); setError('');
-    try { const result = await apiRequest<{ order: Order }>(`/orders/${order._id}/payment-declare`, { method: 'POST', token: auth.token }); setOrder(result.order); }
+    try { await apiRequest<{ order: Order }>(`/orders/${order._id}/payment-declare`, { method: 'POST', token: auth.token }); await load(); }
     catch (caught) { setError(caught instanceof Error ? caught.message : 'Payment could not be reported.'); }
     finally { setWorking(false); }
   };
@@ -77,12 +84,12 @@ export default function OrderDetailPage() {
   if (!order) return <RequireAuth><main className="centered-page"><p className="eyebrow">Order unavailable</p><h1>We could not open this order</h1><p>{error}</p><Link href="/orders" className="button">Back to my orders</Link></main></RequireAuth>;
   const status = orderStatus(order.status);
 
-  return <RequireAuth><main className="order-detail site-container"><Link href="/orders" className="back-link"><ArrowLeft size={16} /> My orders</Link><div className="order-detail__heading"><div><p className={`status-pill status-pill--${status.tone}`}>{status.label}</p><h1>{order.paymentReference}</h1><p>{status.message}</p></div><button className="refresh-button" onClick={load} disabled={loading}><RefreshCw size={17} className={loading ? 'is-spinning' : ''} /> Refresh status</button></div>
+  return <RequireAuth><main className="order-detail site-container"><Link href="/orders" className="back-link"><ArrowLeft size={16} /> My orders</Link><div className="order-detail__heading"><div><p className={`status-pill status-pill--${status.tone}`}>{status.label}</p><h1>Order details</h1><p className="order-detail__reference">{order.paymentReference} <span>· {formatDateTime(order.createdAt)}</span></p><p>{status.message}</p></div><button className="refresh-button" onClick={load} disabled={loading}><RefreshCw size={17} className={loading ? 'is-spinning' : ''} /> Refresh status</button></div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    <div className="order-detail__grid"><section className="receipt"><p className="eyebrow">Order summary</p>{order.items.map((item, index) => <div className="receipt-line" key={`${item.foodName}-${index}`}><div><strong>{item.foodName}</strong><span>{item.stallName} · {formatMoney(item.unitPrice)} × {item.quantity}</span></div><strong>{formatMoney(item.subtotal)}</strong></div>)}<div className="receipt-total"><span>Total</span><strong>{formatMoney(order.totalAmount)}</strong></div></section>
-      <aside className="payment-panel">{order.status === 'AWAITING_PAYMENT' && <><p className="eyebrow">Complete your transfer</p><h2>{formatMoney(order.totalAmount)}</h2>{checkout ? <div className="payment-instructions"><div><span>KBZ account</span><strong>{checkout.kbzAccountName || 'Account name unavailable'}</strong><strong>{checkout.kbzAccountNumber || 'Account number unavailable'}</strong></div><div><span>Reference</span><strong>{checkout.reference}</strong></div>{checkout.paymentInstructions && <p>{checkout.paymentInstructions}</p>}</div> : <p>Payment details were shown when this order was created. If they are missing, contact the organisers before transferring.</p>}<p className="deadline"><Clock3 size={17} /> Reserved until {formatDateTime(order.reservationExpiresAt)}</p><button className="button button--full" onClick={declarePayment} disabled={working}>{working ? 'Saving…' : 'I have made the payment'}</button><small>Only press this after completing the KBZ transfer. Orders cannot be cancelled afterward.</small></>}
-        {['PAYMENT_DECLARED','PAYMENT_REUPLOAD_REQUESTED'].includes(order.status) && <><p className="eyebrow">Payment proof</p><h2>Upload your screenshot</h2>{order.status === 'PAYMENT_REUPLOAD_REQUESTED' && <p className="inline-warning">{payment?.reuploadReason || 'The organisers asked for a clearer screenshot.'}</p>}<label className="upload-field"><Upload aria-hidden="true" /><strong>{file ? file.name : 'Choose payment screenshot'}</strong><span>JPEG, PNG or WebP · up to 7 MB</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseFile} /></label>{fileError && <p className="form-error">{fileError}</p>}<button className="button button--full" onClick={uploadProof} disabled={!file || working}>{working ? 'Uploading…' : 'Submit payment proof'}</button>{order.paymentProofExpiresAt && order.status === 'PAYMENT_DECLARED' && <p className="deadline"><Clock3 size={17} /> Upload by {formatDateTime(order.paymentProofExpiresAt)}</p>}</>}
-        {order.status === 'PAYMENT_SUBMITTED' && <div className="waiting-panel"><Clock3 aria-hidden="true" /><p className="eyebrow">With the organisers</p><h2>Payment under review</h2><p>Keep this page. Refresh when you want to check for an update; we will not repeatedly use your connection in the background.</p></div>}
+    <div className="order-detail__grid"><OrderFoodSummary key={order._id} order={order} />
+      <aside className={`payment-panel ${['AWAITING_PAYMENT', 'PAYMENT_DECLARED', 'PAYMENT_REUPLOAD_REQUESTED'].includes(order.status) ? 'payment-panel--action' : ''}`} aria-label="Payment and collection">{order.status === 'AWAITING_PAYMENT' && <PaymentGuide key={order._id} order={order} checkout={checkout} working={working} onPaid={declarePayment} />}
+        {['PAYMENT_DECLARED','PAYMENT_REUPLOAD_REQUESTED'].includes(order.status) && <><p className="eyebrow">Next: send your receipt</p><h2>Upload payment proof</h2><p className="payment-upload-help">Choose the saved receipt or screenshot from your KBZ transfer. Then select <strong>Send receipt for review</strong> below.</p><p className="payment-upload-help">The image should clearly show the amount, recipient and transaction number.</p>{order.status === 'PAYMENT_REUPLOAD_REQUESTED' && <p className="inline-warning">{payment?.reuploadReason || 'The organisers asked for a clearer screenshot.'}</p>}<label className="upload-field"><Upload aria-hidden="true" /><strong>{file ? file.name : 'Choose receipt image'}</strong><span>JPEG, PNG or WebP · up to 7 MB</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseFile} /></label>{fileError && <p className="form-error">{fileError}</p>}<button className="button button--full" onClick={uploadProof} disabled={!file || working}>{working ? 'Uploading…' : 'Send receipt for review'}</button><p className="payment-upload-next">After the upload succeeds, your status changes to <strong>Payment under review</strong>.</p>{order.paymentProofExpiresAt && order.status === 'PAYMENT_DECLARED' && <p className="deadline"><Clock3 size={17} /> Upload by {formatDateTime(order.paymentProofExpiresAt)}</p>}</>}
+        {order.status === 'PAYMENT_SUBMITTED' && <div className="waiting-panel"><div className="receipt-received"><Check size={18} aria-hidden="true" /> Receipt received</div><p className="eyebrow">With the organisers</p><h2>Payment under review</h2><p>Your receipt was sent successfully. The organisers are checking your transfer.</p><p>Your collection code will appear here once payment is approved. You can use <strong>Refresh status</strong> to check for an update.</p></div>}
         {order.status === 'PAYMENT_APPROVED' && <div className="ticket-panel"><TicketCheck aria-hidden="true" /><p className="eyebrow">Your collection code</p><h2>{ticket?.code || 'Ticket is being prepared'}</h2><p>One code covers every food item in this order. It can only be redeemed once.</p>{ticket?.code && <button className="button button--quiet button--full" onClick={async () => { await navigator.clipboard.writeText(ticket.code); setCopied(true); setTimeout(() => setCopied(false), 1800); }}>{copied ? <Check size={17} /> : <Copy size={17} />}{copied ? 'Copied' : 'Copy code'}</button>}</div>}
         {['PAYMENT_REJECTED','PAYMENT_EVIDENCE_EXPIRED','CANCELLED','EXPIRED'].includes(order.status) && <div className="waiting-panel"><p className="eyebrow">Order closed</p><h2>{status.label}</h2><p>{payment?.rejectionReason || status.message}</p><Link href="/foods" className="button button--quiet">Return to the menu</Link></div>}
       </aside></div>

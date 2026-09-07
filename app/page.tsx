@@ -170,6 +170,21 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <section className="crew-invitation site-container" aria-labelledby="crew-invitation-title">
+        <div className="crew-invitation__stamp" aria-hidden="true">
+          <Sparkles size={24} />
+          <span>06</span>
+          <small>FAIR MAKERS</small>
+        </div>
+        <div className="crew-invitation__copy">
+          <p className="crew-kicker">A LITTLE BEHIND THE SCENES</p>
+          <h2 id="crew-invitation-title">Good people. <em>Fun ideas.</em></h2>
+          <p>Meet the six people who brought this little corner of the fair to life.</p>
+        </div>
+        <Link href="/team" className="crew-invitation__link">
+          Meet the crew <ArrowRight size={19} aria-hidden="true" />
+        </Link>
+      </section>
     </main>
   );
 }

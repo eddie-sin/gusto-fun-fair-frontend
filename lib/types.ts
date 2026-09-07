@@ -50,6 +50,7 @@ export type OrderItem = {
   foodId?: string;
   stallName: string;
   foodName: string;
+  foodImage?: Media | null;
   quantity: number;
   unitPrice: number;
   subtotal: number;

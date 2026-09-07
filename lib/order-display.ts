@@ -1,7 +1,7 @@
-export const ORDER_STATUS: Record<string, { label: string; tone: 'waiting' | 'good' | 'bad' | 'neutral'; message: string }> = {
-  AWAITING_PAYMENT: { label: 'Waiting for payment', tone: 'waiting', message: 'Your food is reserved. Complete the transfer before the reservation ends.' },
-  PAYMENT_DECLARED: { label: 'Upload payment proof', tone: 'waiting', message: 'Payment reported. Upload your KBZ screenshot before the proof deadline.' },
-  PAYMENT_SUBMITTED: { label: 'Payment under review', tone: 'waiting', message: 'Your screenshot is with the organisers. You do not need to submit it again.' },
+export const ORDER_STATUS: Record<string, { label: string; tone: 'waiting' | 'proof' | 'review' | 'good' | 'bad' | 'neutral'; message: string }> = {
+  AWAITING_PAYMENT: { label: 'Waiting for payment', tone: 'waiting', message: 'Transfer by KBZ, include your order reference in the payment note, then submit your receipt.' },
+  PAYMENT_DECLARED: { label: 'Upload payment proof', tone: 'proof', message: 'Payment reported. Upload your saved KBZ receipt to send this order for review.' },
+  PAYMENT_SUBMITTED: { label: 'Payment under review', tone: 'review', message: 'Your screenshot is with the organisers. You do not need to submit it again.' },
   PAYMENT_REUPLOAD_REQUESTED: { label: 'New screenshot needed', tone: 'bad', message: 'The organisers need a clearer payment screenshot.' },
   PAYMENT_APPROVED: { label: 'Ready to collect', tone: 'good', message: 'Payment approved. Your digital collection ticket is ready.' },
   PAYMENT_REJECTED: { label: 'Payment rejected', tone: 'bad', message: 'The payment could not be approved. See the details for the reason.' },
