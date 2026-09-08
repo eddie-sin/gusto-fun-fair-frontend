@@ -4,8 +4,8 @@ export const SITE_NAME = "GUSTO Fun Fair";
 export const EVENT_DETAILS = {
   name: "GUSTO Fun Fair 2026",
   date: "11 September 2026",
-  time: "Time to be announced",
-  place: "Venue to be announced",
+  time: "9 AM – 4 PM",
+  place: "Time City Clock Tower",
 };
 
 export const CACHE_KEYS = {

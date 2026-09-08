@@ -188,17 +188,27 @@ h3 {
 }
 
 .preorder-strip {
-  color: white;
-  background: var(--ink);
+  display: block;
+  width: 100%;
+  color: var(--ink);
+  background: var(--paper-deep);
+  border-bottom: 1px solid var(--line);
   font-size: 0.83rem;
   font-weight: 700;
 }
 .preorder-strip--open {
-  background: var(--red);
+  background: var(--mustard);
+  color: var(--ink);
+}
+.preorder-strip--closed, .preorder-strip--disabled {
+  background: var(--ink);
+  color: var(--white);
 }
 .preorder-strip__inner {
   display: flex;
-  min-height: 2.25rem;
+  min-height: 2.5rem;
+  padding-block: .5rem;
+  line-height: 1.5;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
@@ -1945,10 +1955,13 @@ h3 {
 .crew-member--6 { margin: 1rem 0 0 1.5rem; --crew-tilt: 2deg; --crew-delay: 280ms; }
 .crew-member__top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .75rem; letter-spacing: .08em; color: var(--ink-soft); padding: .15rem .15rem .85rem; }
 .crew-portrait { position: relative; aspect-ratio: 1.12; overflow: hidden; background: var(--crew-photo); }
-.crew-portrait img { position: absolute; max-width: none; object-fit: contain; }
+.crew-portrait img { position: absolute; width: 100%; height: 100%; inset: 0; object-fit: cover; object-position: center 40%; }
 /* Crop the existing transparent photos inside a quiet, rectangular frame. */
 .crew-portrait--kaung img { width: 92%; height: auto; left: 4%; top: -8%; }
-.crew-portrait--eddie img { width: 110%; height: auto; left: -5%; top: -24%; }
+.crew-portrait--eddie img { object-position: center 42%; }
+.crew-portrait--shun img, .crew-portrait--linn img { object-position: center 70%; }
+.crew-portrait--joseph img { object-position: center 28%; }
+.crew-portrait--noko img { object-position: center 26%; }
 .crew-portrait__note { position: absolute; bottom: .7rem; left: .6rem; padding: .25rem .6rem; max-width: calc(100% - 1.2rem); background: #fffdf7ed; color: var(--ink); font: italic 1rem Georgia, serif; transform: rotate(-3deg); }
 .crew-portrait--initials { background: #eeeee6; }
 .crew-member--3 .crew-portrait { background: #eee6e0; }
@@ -2168,3 +2181,47 @@ h3 {
 }
 
 .payment-upload-feedback { display: block; margin: 1rem 0; }
+
+/* Keep mixed Myanmar/Latin stall names legible without changing Latin display titles. */
+.stall-title { overflow-wrap: anywhere; }
+.stall-card__body h2.stall-title--myanmar,
+.stall-detail-hero h1.stall-title--myanmar {
+  font-family: "Noto Sans Myanmar", "Myanmar Text", "Myanmar MN", "Padauk", sans-serif;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.65;
+}
+.stall-card__body h2.stall-title--myanmar { font-size: clamp(1.4rem, 2.6vw, 2rem); }
+.stall-detail-hero h1.stall-title--myanmar { font-size: clamp(1.75rem, 3.8vw, 3rem); }
+
+/* Compact search stays in view; secondary controls open on demand. */
+.food-tools { margin-bottom: .35rem; }
+.food-tools__row { display: flex; align-items: stretch; gap: .65rem; }
+.food-search { display: flex; align-items: center; gap: .65rem; flex: 1; min-width: 0; padding: 0 .85rem; border: 1px solid var(--line); border-radius: .65rem; background: var(--white); }
+.food-search:focus-within { outline: 2px solid var(--blue-dark); outline-offset: 2px; }
+.food-search > svg { flex-shrink: 0; color: var(--ink-soft); }
+.food-search input { min-width: 0; width: 100%; padding: .8rem 0; border: 0; outline: none; background: transparent; font-size: 1rem; }
+.food-search button { display: grid; place-items: center; width: 2.75rem; min-height: 2.75rem; flex-shrink: 0; background: transparent; border: 0; color: var(--ink); cursor: pointer; }
+.food-filter-trigger { display: flex; align-items: center; justify-content: center; gap: .45rem; min-height: 3rem; padding: .65rem .85rem; border: 1px solid var(--ink); border-radius: .65rem; color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; }
+.food-filter-trigger > span { border-radius: 50%; background: var(--ink); color: var(--white); font-size: .75rem; min-width: 1.25rem; }
+.food-filter-chips { display: flex; gap: .45rem; overflow-x: auto; padding: .65rem 0 .25rem; }
+.food-filter-chips button { display: inline-flex; align-items: center; gap: .4rem; flex-shrink: 0; min-height: 2.75rem; max-width: 80%; padding: .4rem .7rem; border: 1px solid var(--line); border-radius: 2rem; color: var(--ink); background: var(--white); font-size: .875rem; cursor: pointer; }
+.food-filter-chips button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.food-filter-chips button svg { flex-shrink: 0; }
+.food-filter-dialog[data-slot="dialog-content"] { max-width: 30rem; padding: 1.5rem; gap: 1.25rem; max-height: 85dvh; overflow-y: auto; color: var(--ink); background: var(--white); }
+.food-filter-dialog [data-slot="dialog-title"] { font: 2rem/1.2 Georgia, serif; }
+.food-filter-dialog [data-slot="dialog-description"] { color: var(--ink-soft); }
+.food-filter-fields { display: grid; gap: 1rem; }
+.food-filter-fields label { display: grid; gap: .4rem; font-size: .875rem; font-weight: 700; }
+.food-filter-fields [data-slot="native-select-wrapper"] { width: 100%; }
+.food-filter-fields select { width: 100%; height: 3rem; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: .5rem; font-size: 1rem; font-weight: 400; }
+.food-filter-actions { display: flex; gap: 1rem; align-items: center; border-top: 1px solid var(--line); padding-top: 1rem; }
+.food-filter-actions > .button { flex: 1; }
+.food-filter-reset { min-height: 2.75rem; padding: .5rem; color: var(--ink); background: transparent; border: 0; text-decoration: underline; cursor: pointer; }
+.food-filter-reset:disabled { opacity: .45; cursor: default; }
+@media (max-width: 600px) {
+  .food-filter-dialog[data-slot="dialog-content"] { top: auto; bottom: 0; left: 0; width: 100%; max-width: none; --tw-translate-x: 0; --tw-translate-y: 0; transform: none; translate: none; animation: none; border-radius: 1.25rem 1.25rem 0 0; padding: 1.25rem 1.25rem max(1.25rem, env(safe-area-inset-bottom)); }
+  .food-filter-trigger { padding-inline: .7rem; font-size: .875rem; }
+  .preorder-strip { font-size: .8125rem; }
+  .preorder-strip__inner > svg { flex-shrink: 0; }
+}

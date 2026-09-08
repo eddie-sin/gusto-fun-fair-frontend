@@ -1,12 +1,11 @@
 'use client';
 
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { FoodFilters } from '@/components/food-filters';
 import { useMemo, useState } from 'react';
 import { CatalogNotice, FoodGridSkeleton } from '@/components/catalog-state';
 import { FoodCard } from '@/components/food-card';
 import { PageHero } from '@/components/page-hero';
 import { useApp } from '@/components/app-provider';
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { useFoods } from '@/lib/use-catalog';
 import { useWebMcpCart } from '@/lib/use-webmcp-cart';
 
@@ -32,14 +31,7 @@ export default function FoodsPage() {
   return <main><PageHero eyebrow="The full menu" title="Pick your fair-day favourites" description="Prices shown are preorder prices. Availability is refreshed when you return to this tab and checked again at checkout." />
     <section className="catalog-section site-container">
       <CatalogNotice sample={resource.isSample} refreshing={resource.isRefreshing} error={resource.error} onRefresh={resource.refresh} />
-      <div className="filter-bar">
-        <label className="search-field"><Search aria-hidden="true" size={19} /><span className="sr-only">Search food</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a food" /></label>
-        <div className="filter-selects"><SlidersHorizontal aria-hidden="true" size={19} />
-          <div><NativeSelect aria-label="Filter by category" value={category} onChange={(event) => setCategory(event.target.value)}><NativeSelectOption value="all">All categories</NativeSelectOption>{categories.map((item) => <NativeSelectOption value={item} key={item}>{item}</NativeSelectOption>)}</NativeSelect></div>
-          <div><NativeSelect aria-label="Filter by stall" value={stall} onChange={(event) => setStall(event.target.value)}><NativeSelectOption value="all">All stalls</NativeSelectOption>{stalls.map((item) => <NativeSelectOption value={item} key={item}>{item}</NativeSelectOption>)}</NativeSelect></div>
-          <div><NativeSelect aria-label="Sort food" value={sort} onChange={(event) => setSort(event.target.value)}><NativeSelectOption value="featured">Featured order</NativeSelectOption><NativeSelectOption value="price-low">Price: low to high</NativeSelectOption><NativeSelectOption value="price-high">Price: high to low</NativeSelectOption><NativeSelectOption value="name">Name: A to Z</NativeSelectOption></NativeSelect></div>
-        </div>
-      </div>
+      <FoodFilters search={search} onSearch={setSearch} category={category} onCategory={setCategory} stall={stall} onStall={setStall} sort={sort} onSort={setSort} categories={categories} stalls={stalls} count={filtered.length} />
       <div className="results-row"><p><strong>{filtered.length}</strong> menu {filtered.length === 1 ? 'item' : 'items'}</p>{resource.isRefreshing && <span>Checking live stock…</span>}</div>
       {resource.isLoading && resource.foods.length === 0 ? <FoodGridSkeleton /> : filtered.length > 0 ? <div className="food-grid">{filtered.map((food) => <FoodCard key={food.stallFoodId} food={food} />)}</div> : <div className="empty-state"><h2>No food matches that search</h2><p>Try a different name, stall or category.</p><button className="button button--quiet" onClick={() => { setSearch(''); setCategory('all'); setStall('all'); }}>Clear filters</button></div>}
     </section>

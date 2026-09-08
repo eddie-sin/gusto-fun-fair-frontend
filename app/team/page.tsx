@@ -22,6 +22,8 @@ const TEAM = [
     initials: "KZ",
     photo: "/images/kaung.png",
     photoClass: "kaung",
+    photoWidth: 810,
+    photoHeight: 1080,
     note: "Keeping us on track",
     description:
       "Connecting the big picture with all the little details that make the fair run smoothly.",
@@ -30,6 +32,10 @@ const TEAM = [
     name: "Shun Lak Thaw Tar",
     role: "Project Manager & Backend",
     initials: "SL",
+    photo: "/images/Shun Lak Thaw Tar.jpg",
+    photoClass: "shun",
+    photoWidth: 959,
+    photoHeight: 1280,
     note: "Making it all click",
     description:
       "Turning ideas into a plan, and that plan into the logic behind your Fun Fair experience.",
@@ -39,6 +45,10 @@ const TEAM = [
     alias: "Joseph",
     role: "Backend",
     initials: "AM",
+    photo: "/images/Joseph.jpg",
+    photoClass: "joseph",
+    photoWidth: 335,
+    photoHeight: 722,
     note: "Behind the scenes",
     description:
       "Joining the dots between your clicks, your orders, and the information that keeps everything moving.",
@@ -47,6 +57,10 @@ const TEAM = [
     name: "No Ko",
     role: "Backend",
     initials: "NK",
+    photo: "/images/Noko.jpg",
+    photoClass: "noko",
+    photoWidth: 962,
+    photoHeight: 1280,
     note: "Details matter",
     description:
       "Looking after the foundations, so the fun on the surface has something solid underneath.",
@@ -55,6 +69,10 @@ const TEAM = [
     name: "Linn Khant Kyaw",
     role: "Frontend",
     initials: "LK",
+    photo: "/images/Linn Khant Kyaw.jpg",
+    photoClass: "linn",
+    photoWidth: 961,
+    photoHeight: 1280,
     note: "From idea to screen",
     description:
       "Giving the fair its digital face, one thoughtful layout and finishing touch at a time.",
@@ -62,10 +80,12 @@ const TEAM = [
   {
     name: "Thant Sin Aung",
     alias: "Eddie",
-    role: "Frontend",
+    role: "Frontend & AWS DevOps",
     initials: "TS",
-    photo: "/images/eddie.png",
+    photo: "/images/eddie.jpg",
     photoClass: "eddie",
+    photoWidth: 720,
+    photoHeight: 1280,
     note: "A little extra personality",
     description:
       "Bringing the pages to life with playful details and interactions that feel good to use.",
@@ -118,8 +138,8 @@ export default function TeamPage() {
                   <img
                     src={member.photo}
                     alt={member.name}
-                    width={member.photoClass === "kaung" ? 810 : 600}
-                    height={member.photoClass === "kaung" ? 1080 : 800}
+                    width={member.photoWidth}
+                    height={member.photoHeight}
                     loading={index < 2 ? "eager" : "lazy"}
                   />
                 ) : (
