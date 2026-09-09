@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Check, Clock3, Copy, Info } from 'lucide-react';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { formatDateTime, formatMoney } from '@/lib/api';
+import { PAYMENT_NOTE } from '@/lib/order-policy';
 import type { CheckoutPayment, Order } from '@/lib/types';
 
 function CopyDetail({ value, label }: { value: string; label: string }) {
@@ -35,8 +36,8 @@ export function PaymentGuide({ order, checkout, working, onPaid }: { order: Orde
       <DialogTrigger className="payment-help-trigger"><Info size={17} aria-hidden="true" /> How to pay</DialogTrigger>
       {accountNumber ? <div className="payment-recipient"><span>KBZ phone / account number</span><CopyDetail value={accountNumber} label="KBZ phone or account number" /><span>Account name</span><strong>{checkout?.kbzAccountName || 'Confirm the recipient name with the organisers.'}</strong></div>
         : <p className="inline-warning">Recipient details are missing. Contact the organisers for the correct KBZ number before paying.</p>}
-      <div className="payment-reference"><span>Payment note / reference</span><CopyDetail value={order.paymentReference} label="order reference" /></div>
-      <p className="payment-guide__reminder">Include this reference in your payment note.</p>
+      <div className="payment-reference"><span>Payment note</span><CopyDetail value={PAYMENT_NOTE} label="payment note" /></div>
+      <p className="payment-guide__reminder">Include “fun fair” in your payment note.</p>
       <p className="deadline"><Clock3 size={17} aria-hidden="true" /> Pay and confirm by {formatDateTime(order.reservationExpiresAt)}</p>
       <button type="button" className="button button--full payment-guide__continue" onClick={onPaid} disabled={working}>{working ? 'Opening upload…' : <>I’ve paid — upload receipt <ArrowRight size={17} aria-hidden="true" /></>}</button>
       <p className="payment-guide__footnote">After a successful transfer, upload your receipt for review.</p>
@@ -48,11 +49,10 @@ export function PaymentGuide({ order, checkout, working, onPaid }: { order: Orde
       </DialogHeader>
       <ol className="payment-steps">
         <li><div className="payment-step__body"><h3>Enter the recipient and amount</h3><p>In your KBZ app, enter <strong>{formatMoney(order.totalAmount)}</strong>{accountNumber ? <> and send to <strong className="payment-help-value">{accountNumber}</strong></> : '. Ask the organisers for the correct KBZ number before paying'}. Check the recipient name{checkout?.kbzAccountName ? <> is <strong>{checkout.kbzAccountName}</strong></> : ' before continuing'}.</p></div></li>
-        <li><div className="payment-step__body"><h3>Add your order reference</h3><p>Put <strong className="payment-help-value">{order.paymentReference}</strong> in the <strong>payment note / remark</strong> field, then confirm the transfer.</p></div></li>
+        <li><div className="payment-step__body"><h3>Add your payment note</h3><p>Put <strong className="payment-help-value">{PAYMENT_NOTE}</strong> in the <strong>payment note / remark</strong> field, then confirm the transfer.</p></div></li>
         <li><div className="payment-step__body"><h3>Save the successful receipt</h3><p>Save or screenshot the confirmation showing the amount, recipient and transaction number.</p></div></li>
         <li><div className="payment-step__body"><h3>Return here and upload it</h3><p>Close this guide and select <strong>I’ve paid — upload receipt</strong>. Choose your saved image, then select <strong>Send receipt for review</strong>. Your order changes to Payment under review once the upload succeeds.</p></div></li>
       </ol>
-      {checkout?.paymentInstructions && <div className="payment-organiser-note"><strong>From the organisers</strong><p>{checkout.paymentInstructions}</p></div>}
       <p className="payment-help-dialog__note">Only confirm after your transfer succeeds. You cannot cancel the order after confirming payment.</p>
       <DialogClose className="button button--quiet payment-help-dialog__close">Got it — back to payment</DialogClose>
     </DialogContent>

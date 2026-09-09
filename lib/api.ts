@@ -4,9 +4,13 @@ export const API_BASE_URL = configuredBase.replace(/\/$/, '');
 export class ApiError extends Error {
   status: number;
   code?: string;
+  stallFoodId?: string;
+  maxQuantity?: number;
+  ticketsRemaining?: number;
   retryAfterSeconds?: number;
-  constructor(message: string, status = 0, options: { code?: string; retryAfterSeconds?: number } = {}) {
+  constructor(message: string, status = 0, options: { code?: string; retryAfterSeconds?: number; stallFoodId?: string; maxQuantity?: number; ticketsRemaining?: number } = {}) {
     super(message); this.name = 'ApiError'; this.status = status;
+    this.ticketsRemaining = options.ticketsRemaining; this.stallFoodId = options.stallFoodId; this.maxQuantity = options.maxQuantity;
     this.code = options.code; this.retryAfterSeconds = options.retryAfterSeconds;
   }
 }
@@ -44,9 +48,12 @@ export async function apiRequest<T>(path: string, options: RequestInit & { token
       throw new ApiError('The server could not be reached. Check your connection and try again.');
     }
     const contentType = response.headers.get('content-type') || '';
-    const body = contentType.includes('application/json') ? await response.json() as { error?: { message?: string; details?: { code?: string; retryAfterSeconds?: number } } } : null;
+    const body = contentType.includes('application/json') ? await response.json() as { error?: { message?: string; details?: { code?: string; retryAfterSeconds?: number; stallFoodId?: string; maxQuantity?: number; ticketsRemaining?: number } } } : null;
     if (!response.ok) throw new ApiError(body?.error?.message || 'Something went wrong. Please try again.', response.status, {
       code: body?.error?.details?.code,
+      stallFoodId: body?.error?.details?.stallFoodId,
+      maxQuantity: body?.error?.details?.maxQuantity,
+      ticketsRemaining: body?.error?.details?.ticketsRemaining,
       retryAfterSeconds: retryAfterSeconds(response.headers.get('Retry-After'), body?.error?.details?.retryAfterSeconds),
     });
     return body as T;
