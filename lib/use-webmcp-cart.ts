@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useApp } from '@/components/app-provider';
+import { maxOrderQuantity, quantityLimitMessage } from './order-policy';
 import type { Food } from './types';
 
 declare global {
@@ -12,6 +14,7 @@ declare global {
 }
 
 export function useWebMcpCart(foods: Food[], addToCart: (food: Food, quantity: number) => void) {
+  const { cart } = useApp();
   useEffect(() => {
     const context = document.modelContext;
     if (!context?.registerTool || foods.length === 0) return;
@@ -27,10 +30,12 @@ export function useWebMcpCart(foods: Food[], addToCart: (food: Food, quantity: n
         const food = foods.find((item) => item.stallFoodId === value.stallFoodId);
         if (!food) throw new Error('Menu item not found.');
         if (!Number.isInteger(value.quantity) || !value.quantity || value.quantity < 1 || value.quantity > food.ticketsRemaining) throw new Error('Quantity is not available.');
+        const inCart = cart.find(line => line.stallFoodId === food.stallFoodId)?.quantity || 0;
+        if (inCart + value.quantity > maxOrderQuantity(food.ticketsRemaining)) throw new Error(quantityLimitMessage(food.ticketsRemaining));
         addToCart(food, value.quantity);
         return { added: true, stallFoodId: food.stallFoodId, quantity: value.quantity, foodName: food.food.name };
       },
     }, { signal: lifecycle.signal })).catch(() => undefined);
     return () => lifecycle.abort();
-  }, [addToCart, foods]);
+  }, [addToCart, foods, cart]);
 }
