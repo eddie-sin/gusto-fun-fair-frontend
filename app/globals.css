@@ -595,6 +595,12 @@ h3 {
   border: 1px solid rgba(29, 53, 87, 0.42);
   box-shadow: 10px 10px 0 rgba(245, 241, 230, 0.12);
 }
+.feature-spotlight--letters .feature-spotlight__intro {
+  background: var(--mustard);
+}
+.feature-spotlight--quiz .feature-spotlight__intro {
+  background: var(--lavender);
+}
 .feature-spotlight__intro::before {
   content: "";
   position: absolute;

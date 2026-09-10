@@ -6,17 +6,22 @@ type FeatureSpotlightProps = {
   content: FeatureSpotlightContent;
   icon: LucideIcon;
   status: string;
+  variant: "memories" | "letters" | "quiz";
 };
 
 export function FeatureSpotlight({
   content,
   icon: Icon,
   status,
+  variant,
 }: FeatureSpotlightProps) {
   const titleId = `feature-spotlight-${content.number}`;
 
   return (
-    <article className="feature-spotlight" aria-labelledby={titleId}>
+    <article
+      className={`feature-spotlight feature-spotlight--${variant}`}
+      aria-labelledby={titleId}
+    >
       <section className="feature-spotlight__intro">
         <div className="feature-spotlight__topline">
           <span className="feature-spotlight__icon" aria-hidden="true">
@@ -25,7 +30,7 @@ export function FeatureSpotlight({
           <span className="feature-spotlight__number">{content.number}</span>
         </div>
         <div className="feature-spotlight__copy">
-          <p className="eyebrow">A photograph to keep</p>
+          <p className="eyebrow">{content.introEyebrow}</p>
           <h3 id={titleId}>{content.title}</h3>
           <p>{content.description}</p>
           <Link href={content.href} className="feature-spotlight__link">
@@ -36,14 +41,14 @@ export function FeatureSpotlight({
         <div className="feature-spotlight__keepsake" aria-hidden="true">
           <span />
           <Sparkles />
-          <small>KEEP THIS MOMENT</small>
+          <small>{content.keepsakeLabel}</small>
         </div>
       </section>
 
       <aside className="feature-spotlight__guide">
         <div className="feature-spotlight__guide-heading">
           <span>FIELD NOTES</span>
-          <span>{content.number} / MEMORY</span>
+          <span>{content.number} / {content.guideLabel}</span>
         </div>
         <section>
           <p className="eyebrow">How it works</p>

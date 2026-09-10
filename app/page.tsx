@@ -4,7 +4,9 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Brain,
   Camera,
+  Heart,
   MapPin,
   Sparkles,
   TicketCheck,
@@ -14,7 +16,11 @@ import { FeatureSpotlight } from "@/components/feature-spotlight";
 import { TeamMemberCard } from "@/components/team-member-card";
 import { EVENT_DETAILS } from "@/lib/content";
 import { GUSTO_2026_FINAL_RESULTS } from "@/lib/fair-results";
-import { MEMORY_BOOTH_SPOTLIGHT } from "@/lib/feature-spotlights";
+import {
+  LETTERS_SPOTLIGHT,
+  MEMORY_BOOTH_SPOTLIGHT,
+  QUIZ_SPOTLIGHT,
+} from "@/lib/feature-spotlights";
 import { useApp } from "@/components/app-provider";
 import { TEAM_MEMBERS } from "@/lib/team";
 
@@ -141,8 +147,29 @@ export default function Home() {
           <FeatureSpotlight
             content={MEMORY_BOOTH_SPOTLIGHT}
             icon={Camera}
+            variant="memories"
             status={
               event?.featureFlags?.memoriesEnabled
+                ? "Currently open"
+                : "Opening details coming soon"
+            }
+          />
+          <FeatureSpotlight
+            content={LETTERS_SPOTLIGHT}
+            icon={Heart}
+            variant="letters"
+            status={
+              event?.featureFlags?.crushLettersEnabled
+                ? "Currently open"
+                : "Opening details coming soon"
+            }
+          />
+          <FeatureSpotlight
+            content={QUIZ_SPOTLIGHT}
+            icon={Brain}
+            variant="quiz"
+            status={
+              event?.featureFlags?.quizEnabled
                 ? "Currently open"
                 : "Opening details coming soon"
             }
