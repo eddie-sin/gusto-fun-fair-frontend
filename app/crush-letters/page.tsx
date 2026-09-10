@@ -1,4 +1,5 @@
 'use client';
+/* oxlint-disable react/react-compiler */
 
 import { Heart, LockKeyhole, Send } from 'lucide-react';
 import { SyntheticEvent, useCallback, useEffect, useState } from 'react';
@@ -49,7 +50,6 @@ export default function CrushLettersPage() {
 
   const needsCode = (allowance?.remaining ?? 1) === 0 && (allowance?.allowance ?? 1) < 3;
   const usedUp = (allowance?.remaining ?? 1) === 0 && (allowance?.allowance ?? 1) >= 3;
-
   const submit = async (formEvent: SyntheticEvent<HTMLFormElement>) => {
     formEvent.preventDefault();
     const cleanName = recipientName.trim(); const cleanMessage = message.trim();

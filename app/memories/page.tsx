@@ -27,7 +27,6 @@ const MEMORY_BOOTH_GUIDE = `🎉 **ပွဲနေ့လာခဲ့ကြနေ
 ဒီ Feature ကို **ပွဲနေ့တစ်ရက်တည်းသာ Specially ဖွင့်ပေးမှာ** ဖြစ်ပါတယ် 🎉📸
 
 **ပွဲနေ့ရောက်မှ ပြန်လာခဲ့နော်!** 👀✨`;
-
 export default function MemoriesPage() {
   const { auth, event } = useApp();
   const [context, setContext] = useState<SnapContext>();
