@@ -4,26 +4,22 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Brain,
   Camera,
-  Heart,
   MapPin,
   Sparkles,
   TicketCheck,
 } from "lucide-react";
-import { FoodCard } from "@/components/food-card";
 import { FairResultsSection } from "@/components/fair-results-section";
+import { FeatureSpotlight } from "@/components/feature-spotlight";
 import { TeamMemberCard } from "@/components/team-member-card";
 import { EVENT_DETAILS } from "@/lib/content";
 import { GUSTO_2026_FINAL_RESULTS } from "@/lib/fair-results";
+import { MEMORY_BOOTH_SPOTLIGHT } from "@/lib/feature-spotlights";
 import { useApp } from "@/components/app-provider";
-import { useFoods } from "@/lib/use-catalog";
 import { TEAM_MEMBERS } from "@/lib/team";
 
 export default function Home() {
   const { event } = useApp();
-  const catalog = useFoods();
-  const featuredFoods = catalog.foods.slice(0, 3);
   return (
     <main>
       <section className="hero">
@@ -103,91 +99,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section site-container">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">A first taste</p>
-            <h2>Fairground favourites</h2>
-          </div>
-          <Link href="/foods" className="underlined-link">
-            See the full menu <ArrowRight aria-hidden="true" size={16} />
-          </Link>
-        </div>
-        {catalog.isSample && (
-          <p className="sample-note">
-            A sample menu is shown while live availability reconnects.
-          </p>
-        )}
-        <div className="food-grid food-grid--featured">
-          {featuredFoods.map((food) => (
-            <FoodCard key={food.stallFoodId} food={food} compact />
-          ))}
-        </div>
-      </section>
-
-      <section className="features-section">
-        <div className="site-container">
-          <div className="section-heading section-heading--light">
-            <div>
-              <p className="eyebrow">More than a menu</p>
-              <h2>Keep a little piece of the day</h2>
-            </div>
-            <p>
-              Three simple spaces for the things you want to remember, the
-              words you almost said, and a little friendly competition.
-            </p>
-          </div>
-          <div className="feature-panels">
-            <article className="feature-panel feature-panel--memory">
-              <Camera aria-hidden="true" />
-              <p className="feature-number">01</p>
-              <h3>Memory Booth</h3>
-              <p>
-                Take a photo at the fair, add a short caption, and leave it in
-                the shared memory wall.
-              </p>
-              <Link href="/memories">
-                Visit memories <ArrowRight aria-hidden="true" size={17} />
-              </Link>
-              <span className="feature-state">
-                {event?.featureFlags?.memoriesEnabled
-                  ? "Currently open"
-                  : "Opening details coming soon"}
-              </span>
-            </article>
-            <article className="feature-panel feature-panel--letters">
-              <Heart aria-hidden="true" />
-              <p className="feature-number">02</p>
-              <h3>Letter to Whom</h3>
-              <p>
-                Write an anonymous note for someone who made the day feel a
-                little different.
-              </p>
-              <Link href="/crush-letters">
-                Write a letter <ArrowRight aria-hidden="true" size={17} />
-              </Link>
-              <span className="feature-state">
-                {event?.featureFlags?.crushLettersEnabled
-                  ? "Accepting letters now"
-                  : "Letters are currently closed"}
-              </span>
-            </article>
-            <article className="feature-panel feature-panel--quiz">
-              <Brain aria-hidden="true" />
-              <p className="feature-number">03</p>
-              <h3>Fair Day Quiz</h3>
-              <p>
-                Answer five random questions in 50 seconds and race for a
-                spot on the leaderboard.
-              </p>
-              <Link href="/quiz">
-                Play the quiz <ArrowRight aria-hidden="true" size={17} />
-              </Link>
-              <span className="feature-state">One code, one attempt</span>
-            </article>
-          </div>
-        </div>
-      </section>
       <section className="home-crew" aria-labelledby="home-crew-title">
         <div className="site-container">
           <header className="home-crew__heading">
@@ -195,7 +106,7 @@ export default function Home() {
             <h2 id="home-crew-title">Meet the people behind the fair.</h2>
           </header>
           <div className="home-crew__grid">
-            {TEAM_MEMBERS.slice(0, 3).map((member, index) => (
+            {TEAM_MEMBERS.map((member, index) => (
               <TeamMemberCard
                 key={member.name}
                 member={member}
@@ -208,14 +119,34 @@ export default function Home() {
             ))}
           </div>
           <div className="home-crew__footer">
-            <div>
-              <strong>+ 3 more members</strong>
-              <p>See the full crew, roles, photos, and stories.</p>
-            </div>
-            <Link href="/team" className="button home-crew__link">
-              Meet the whole team <ArrowRight size={19} aria-hidden="true" />
+            <Link href="/team" className="underlined-link">
+              View team page <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      <section className="features-section">
+        <div className="site-container">
+          <div className="section-heading section-heading--light">
+            <div>
+              <p className="eyebrow">More than a menu</p>
+              <h2>Keep a little piece of the day</h2>
+            </div>
+            <p>
+              Fair-day experiences deserve more than a shortcut. Start with a
+              shared place for the moments worth keeping.
+            </p>
+          </div>
+          <FeatureSpotlight
+            content={MEMORY_BOOTH_SPOTLIGHT}
+            icon={Camera}
+            status={
+              event?.featureFlags?.memoriesEnabled
+                ? "Currently open"
+                : "Opening details coming soon"
+            }
+          />
         </div>
       </section>
       <FairResultsSection results={GUSTO_2026_FINAL_RESULTS} />

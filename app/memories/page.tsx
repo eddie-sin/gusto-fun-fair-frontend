@@ -8,25 +8,10 @@ import { useApp } from '@/components/app-provider';
 import { FloatingGuide } from '@/components/floating-guide';
 import { MemoryGallery } from '@/components/memory-gallery';
 import { apiRequest, formatDateTime } from '@/lib/api';
+import { MEMORY_BOOTH_GUIDE } from '@/lib/feature-spotlights';
 
 type SnapContext = { opensAt: string | null; closesAt: string | null; status: 'NOT_CONFIGURED' | 'UPCOMING' | 'OPEN' | 'CLOSED'; allowance?: number; used?: number; remaining?: number };
 
-const MEMORY_BOOTH_GUIDE = `🎉 **ပွဲနေ့လာခဲ့ကြနော်!**
-
-ပွဲနေ့ရောက်ရင် **Regular Users** အားလုံးအတွက် 📸 **Photo တစ်ပုံရိုက်ပြီး Website ပေါ်မှာတင်နိုင်မယ့် အခွင့်အရေး** ရှိပါတယ်နော်!
-
-ပွဲပြီးသွားတဲ့အချိန်မှာတောင် ဒီ Website ကို ပြန်ဝင်ပြီး **ကိုယ်ရိုက်ခဲ့တဲ့ပုံလေးတွေ၊ သူငယ်ချင်းတွေရဲ့ပုံလေးတွေကို ပြန်ကြည့်လို့ရမယ်** 👀✨
-ပြီးတော့ ကြိုက်တဲ့ပုံလေးတွေကို ❤️ **React လေးတွေပေးပြီး Support လုပ်လို့လည်းရပါတယ်!**
-
-🎟️ **Pre-order တင်ထားတဲ့သူတွေအတွက်တော့ Special Bonus ရှိတယ်နော်!**
-
-ရရှိထားတဲ့ **Code** ကိုအသုံးပြုပြီး **Photo တစ်ပုံထပ်တင်နိုင်မှာ** ဖြစ်ပါတယ် 📸💜
-
-🔒 **Photo Feature လောလောဆယ် ပိတ်ထားပါတယ်နော်!**
-
-ဒီ Feature ကို **ပွဲနေ့တစ်ရက်တည်းသာ Specially ဖွင့်ပေးမှာ** ဖြစ်ပါတယ် 🎉📸
-
-**ပွဲနေ့ရောက်မှ ပြန်လာခဲ့နော်!** 👀✨`;
 export default function MemoriesPage() {
   const { auth, event } = useApp();
   const [context, setContext] = useState<SnapContext>();
