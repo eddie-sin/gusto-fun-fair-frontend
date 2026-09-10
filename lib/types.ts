@@ -94,7 +94,8 @@ export type CheckoutPayment = {
 export type QuizCodeValidation = { eligible: boolean; alreadyUsed: boolean; orderId: string };
 export type QuizQuestionPublic = { questionId: string; version: number; question: string; options: string[] };
 export type QuizStart = { attemptId: string; questions: QuizQuestionPublic[] };
-export type QuizSubmitResult = { attemptId: string; score: number; passed: boolean; timedOut: boolean; elapsedMs: number; reward?: { type: string; message?: string } };
+export type QuizResultEntry = { questionId: string; question: string; options: string[]; correctOption: number; yourAnswer: number; correct: boolean };
+export type QuizSubmitResult = { attemptId: string; score: number; passed: boolean; timedOut: boolean; elapsedMs: number; reward?: { type: string; message?: string }; results: QuizResultEntry[] };
 export type QuizLeaderboardEntry = { rank: number; name: string; elapsedMs: number; submittedAt: string };
 
 export type FairResultStatus = 'LOCKED' | 'CALCULATING' | 'READY';
