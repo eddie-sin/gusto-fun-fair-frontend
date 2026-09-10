@@ -11,9 +11,13 @@ import {
   TicketCheck,
 } from "lucide-react";
 import { FoodCard } from "@/components/food-card";
+import { FairResultsSection } from "@/components/fair-results-section";
+import { TeamMemberCard } from "@/components/team-member-card";
 import { EVENT_DETAILS } from "@/lib/content";
+import { GUSTO_2026_FINAL_RESULTS } from "@/lib/fair-results";
 import { useApp } from "@/components/app-provider";
 import { useFoods } from "@/lib/use-catalog";
+import { TEAM_MEMBERS } from "@/lib/team";
 
 export default function Home() {
   const { event } = useApp();
@@ -170,21 +174,37 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="crew-invitation site-container" aria-labelledby="crew-invitation-title">
-        <div className="crew-invitation__stamp" aria-hidden="true">
-          <Sparkles size={24} />
-          <span>06</span>
-          <small>FAIR MAKERS</small>
+      <section className="home-crew" aria-labelledby="home-crew-title">
+        <div className="site-container">
+          <header className="home-crew__heading">
+            <p className="crew-kicker">06 / THE MAKERS</p>
+            <h2 id="home-crew-title">Meet the people behind the fair.</h2>
+          </header>
+          <div className="home-crew__grid">
+            {TEAM_MEMBERS.slice(0, 3).map((member, index) => (
+              <TeamMemberCard
+                key={member.name}
+                member={member}
+                index={index}
+                total={TEAM_MEMBERS.length}
+                compact
+                headingLevel="h3"
+                idPrefix="home-member"
+              />
+            ))}
+          </div>
+          <div className="home-crew__footer">
+            <div>
+              <strong>+ 3 more members</strong>
+              <p>See the full crew, roles, photos, and stories.</p>
+            </div>
+            <Link href="/team" className="button home-crew__link">
+              Meet the whole team <ArrowRight size={19} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
-        <div className="crew-invitation__copy">
-          <p className="crew-kicker">A LITTLE BEHIND THE SCENES</p>
-          <h2 id="crew-invitation-title">Good people. <em>Fun ideas.</em></h2>
-          <p>Meet the six people who brought this little corner of the fair to life.</p>
-        </div>
-        <Link href="/team" className="crew-invitation__link">
-          Meet the crew <ArrowRight size={19} aria-hidden="true" />
-        </Link>
       </section>
+      <FairResultsSection results={GUSTO_2026_FINAL_RESULTS} />
     </main>
   );
 }

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { SITE_NAME } from '@/lib/content';
 import { useApp } from './app-provider';
 
-const links = [['/', 'Home'], ['/foods', 'Food'], ['/stalls', 'Stalls'], ['/orders', 'Orders'], ['/memories', 'Memories'], ['/crush-letters', 'Crush Letters']] as const;
+const links = [['/', 'Home'], ['/foods', 'Food'], ['/stalls', 'Stalls'], ['/orders', 'Orders'], ['/memories', 'Memories'], ['/crush-letters', 'Crush Letters'], ['/team', 'Team']] as const;
 
 export function SiteHeader() {
   const pathname = usePathname();

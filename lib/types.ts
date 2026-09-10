@@ -89,3 +89,34 @@ export type CheckoutPayment = {
   kbzAccountNumber?: string;
   paymentInstructions?: string;
 };
+
+export type FairResultStatus = 'LOCKED' | 'CALCULATING' | 'READY';
+
+export type RankedStallRevenueResult = {
+  rank: number;
+  stallName: string;
+  revenue: number;
+};
+
+export type RankedStallItemsResult = {
+  rank: number;
+  stallName: string;
+  itemsSold: number;
+};
+
+export type RankedItemResult = {
+  rank: number;
+  itemName: string;
+  stallName: string;
+  itemsSold?: number;
+};
+
+// Expected public API payload: { results: FairResults } from GET /results.
+// Rank values are supplied by the backend so tied entries can share a rank.
+export type FairResults = {
+  status: FairResultStatus;
+  finalizedAt?: string;
+  topStallsByRevenue: RankedStallRevenueResult[];
+  topStallsByItemsSold: RankedStallItemsResult[];
+  bestSellingItems: RankedItemResult[];
+};
