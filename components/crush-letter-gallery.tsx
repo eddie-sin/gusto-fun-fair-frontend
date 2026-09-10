@@ -30,7 +30,10 @@ export function CrushLetterGallery({ extraHeaders }: { extraHeaders?: Record<str
     {!loading && letters.length === 0 && <div className="closed-message"><p>No approved letters yet.</p><span>Approved letters will appear here as Admin reviews them.</span></div>}
     <div className="letter-gallery-grid">
       {letters.map((letter) => <article key={letter.id} className="letter-card">
-        <p className="letter-card-to">To {letter.recipientName}</p>
+        <div className="letter-card-to">
+          <span className="letter-card-to-label">To</span>
+          <span className="letter-card-to-name">{letter.recipientName}</span>
+        </div>
         <p className="letter-card-message">{letter.message}</p>
         <small>{formatDateTime(letter.createdAt)}</small>
       </article>)}

@@ -1866,31 +1866,104 @@ h3 {
   color: var(--ink-soft);
 }
 .letter-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
   margin-bottom: 1.5rem;
 }
 .letter-card {
-  display: grid;
-  gap: 0.6rem;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
   background: var(--white);
-  box-shadow: 4px 4px 0 var(--ink);
-  padding: 1.2rem;
+  border: 2px solid var(--ink);
+  border-radius: 1.4rem;
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 1.3rem 1.4rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(1rem) scale(0.98);
+  animation: letter-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.letter-card:hover {
+  transform: translateY(-0.3rem);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.letter-card:nth-child(2) { animation-delay: 0.07s; }
+.letter-card:nth-child(3) { animation-delay: 0.14s; }
+.letter-card:nth-child(4) { animation-delay: 0.21s; }
+.letter-card:nth-child(5) { animation-delay: 0.28s; }
+.letter-card:nth-child(n+6) { animation-delay: 0.34s; }
+@keyframes letter-card-in {
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .letter-card-to {
+  order: 1;
+  align-self: flex-start;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  background: linear-gradient(135deg, var(--red), var(--red-dark));
+  color: var(--white);
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform 0.2s ease;
+}
+.letter-card:hover .letter-card-to {
+  transform: rotate(-1.5deg) scale(1.03);
+}
+.letter-card-to-label {
   font-weight: 700;
-  color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.14em;
+  opacity: 0.85;
+}
+.letter-card-to-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  word-break: break-word;
 }
 .letter-card-message {
+  order: 2;
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  position: relative;
+  overflow-wrap: anywhere;
+  background: var(--paper-deep);
+  border: 1.5px solid var(--ink);
+  border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
+  padding: 1rem 1.2rem;
   white-space: pre-wrap;
+  line-height: 1.6;
 }
 .letter-card small {
+  order: 3;
+  align-self: flex-end;
   color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .letter-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .letter-card,
+  .letter-card-to {
+    transition: none;
+  }
 }
 .letter-gallery .pagination {
   display: flex;
