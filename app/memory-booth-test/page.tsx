@@ -25,6 +25,11 @@ type SnapContext = {
 };
 
 const testHeaders = (key: string) => ({ "X-Memory-Booth-Test-Key": key });
+const MAX_CAPTION_WORDS = 25;
+const wordCount = (value: string) => {
+  const trimmed = value.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+};
 
 export default function MemoryBoothTestPage() {
   const { auth, event } = useApp();
@@ -33,6 +38,7 @@ export default function MemoryBoothTestPage() {
   const [context, setContext] = useState<SnapContext>();
   const [file, setFile] = useState<File>();
   const [caption, setCaption] = useState("");
+  const [privilegeCode, setPrivilegeCode] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,9 +95,12 @@ export default function MemoryBoothTestPage() {
 
   const upload = async () => {
     if (!auth || !file || !activeKey) return;
+    if (wordCount(caption) > MAX_CAPTION_WORDS)
+      return setError(`Your caption must be ${MAX_CAPTION_WORDS} words or fewer.`);
     const body = new FormData();
     body.append("image", file);
     body.append("caption", caption.trim());
+    if (privilegeCode.trim()) body.append("privilegeCode", privilegeCode.trim());
     setUploading(true);
     setError("");
     setMessage("");
@@ -104,6 +113,7 @@ export default function MemoryBoothTestPage() {
       });
       setFile(undefined);
       setCaption("");
+      setPrivilegeCode("");
       setMessage("Uploaded to R2 and queued for Admin review.");
       await load();
     } catch (caught) {
@@ -196,7 +206,7 @@ export default function MemoryBoothTestPage() {
                 </div>
               </div>
               <label
-                className={`upload-field ${!context || context.remaining === 0 ? "is-disabled" : ""}`}
+                className={`upload-field ${!context || (context.used ?? 0) >= 2 ? "is-disabled" : ""}`}
               >
                 <ImagePlus aria-hidden="true" />
                 <strong>{file ? file.name : "Choose a test photo"}</strong>
@@ -205,7 +215,7 @@ export default function MemoryBoothTestPage() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={chooseFile}
-                  disabled={!context || context.remaining === 0}
+                  disabled={!context || (context.used ?? 0) >= 2}
                 />
               </label>
               <label className="field">
@@ -220,7 +230,24 @@ export default function MemoryBoothTestPage() {
                   disabled={!context}
                   placeholder="What should Admin review?"
                 />
+                <small className={wordCount(caption) > MAX_CAPTION_WORDS ? "is-over-limit" : ""}>
+                  {wordCount(caption)}/{MAX_CAPTION_WORDS} words
+                </small>
               </label>
+              {(context?.used ?? 0) >= 1 && (context?.used ?? 0) < 2 && (
+                <label className="field">
+                  <span>
+                    Pre-order privilege code{" "}
+                    <small>unlocks your second photo</small>
+                  </span>
+                  <input
+                    value={privilegeCode}
+                    onChange={(e) => setPrivilegeCode(e.target.value)}
+                    placeholder="From any approved order — yours or a friend's"
+                    disabled={!context}
+                  />
+                </label>
+              )}
               {error && (
                 <p className="form-error" role="alert">
                   {error}
@@ -231,7 +258,7 @@ export default function MemoryBoothTestPage() {
                 className="button button--full"
                 onClick={upload}
                 disabled={
-                  !context || !file || uploading || context.remaining === 0
+                  !context || !file || uploading || (context.used ?? 0) >= 2
                 }
               >
                 {uploading ? (

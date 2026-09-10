@@ -1,7 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-import { Heart, HeartCrack } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Expand, Heart, HeartCrack, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { apiRequest, formatDateTime, mediaUrl } from '@/lib/api';
 
@@ -19,9 +18,11 @@ export function MemoryGallery({ token, extraHeaders }: { token?: string; extraHe
   const [memories, setMemories] = useState<Memory[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [myReactions, setMyReactions] = useState<Record<string, Reaction>>({});
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [pending, setPending] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const loadReactions = useCallback(async (rows: Memory[]) => {
     if (!token) return;
@@ -64,22 +65,72 @@ export function MemoryGallery({ token, extraHeaders }: { token?: string; extraHe
     } finally { setPending(''); }
   };
 
+  const closeLightbox = useCallback(() => setLightboxIndex(null), []);
+  const step = useCallback((delta: number) => {
+    setLightboxIndex((current) => current === null ? current : (current + delta + memories.length) % memories.length);
+  }, [memories.length]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    document.body.style.overflow = 'hidden';
+    const onKey = (keyboardEvent: KeyboardEvent) => {
+      if (keyboardEvent.key === 'Escape') closeLightbox();
+      else if (keyboardEvent.key === 'ArrowRight') step(1);
+      else if (keyboardEvent.key === 'ArrowLeft') step(-1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey); };
+  }, [lightboxIndex, closeLightbox, step]);
+
+  const reactionButtons = (memory: Memory) => {
+    const liked = myReactions[memory.id] === 'LIKE';
+    const disliked = myReactions[memory.id] === 'DISLIKE';
+    return <div className="memory-reactions">
+      <button type="button" className={`memory-reaction memory-reaction--like ${liked ? 'is-active' : ''}`} disabled={!token || pending === memory.id} onClick={() => react(memory, 'LIKE')} aria-pressed={liked}><Heart size={16} aria-hidden="true" />{memory.likes}</button>
+      <button type="button" className={`memory-reaction memory-reaction--dislike ${disliked ? 'is-active' : ''}`} disabled={!token || pending === memory.id} onClick={() => react(memory, 'DISLIKE')} aria-pressed={disliked}><HeartCrack size={16} aria-hidden="true" />{memory.dislikes}</button>
+    </div>;
+  };
+
+  const active = lightboxIndex !== null ? memories[lightboxIndex] : undefined;
+
   return <div className="memory-gallery">
     {error && <p className="form-error" role="alert">{error}</p>}
     {!loading && memories.length === 0 && <div className="closed-message"><p>No approved photos yet.</p><span>Approved memories will appear here as Admin reviews them.</span></div>}
     <div className="memory-gallery-grid">
-      {memories.map((memory) => <article key={memory.id} className="memory-card">
-        <Image src={mediaUrl(memory.imageUrl)} alt={memory.caption || 'Approved event memory'} width={600} height={600} unoptimized />
+      {memories.map((memory, index) => <article key={memory.id} className="memory-card" style={{ animationDelay: `${Math.min(index, 11) * 70}ms` }}>
+        <button type="button" className="memory-card-media" onClick={() => setLightboxIndex(index)} aria-label={`View ${memory.caption || 'this memory'} full size`}>
+          {!loadedImages[memory.id] && <span className="memory-card-shimmer" aria-hidden="true" />}
+          {/* eslint-disable-next-line @next/next/no-img-element -- natural aspect ratio matters here: uploads are phone-shaped portraits, not fixed squares */}
+          <img
+            src={mediaUrl(memory.imageUrl)}
+            alt={memory.caption || 'Approved event memory'}
+            loading="lazy"
+            decoding="async"
+            className={loadedImages[memory.id] ? 'is-loaded' : ''}
+            onLoad={() => setLoadedImages((current) => ({ ...current, [memory.id]: true }))}
+          />
+          <span className="memory-card-expand" aria-hidden="true"><Expand size={16} /></span>
+        </button>
         <div>
           <p>{memory.caption || 'No caption'}</p>
           <small>{formatDateTime(memory.createdAt)}</small>
-          <div className="memory-reactions">
-            <button type="button" className={`memory-reaction ${myReactions[memory.id] === 'LIKE' ? 'is-active' : ''}`} disabled={!token || pending === memory.id} onClick={() => react(memory, 'LIKE')} aria-pressed={myReactions[memory.id] === 'LIKE'}><Heart size={16} aria-hidden="true" />{memory.likes}</button>
-            <button type="button" className={`memory-reaction ${myReactions[memory.id] === 'DISLIKE' ? 'is-active' : ''}`} disabled={!token || pending === memory.id} onClick={() => react(memory, 'DISLIKE')} aria-pressed={myReactions[memory.id] === 'DISLIKE'}><HeartCrack size={16} aria-hidden="true" />{memory.dislikes}</button>
-          </div>
+          {reactionButtons(memory)}
         </div>
       </article>)}
     </div>
     {nextCursor && <button className="button" onClick={() => load(nextCursor)} disabled={loading}>{loading ? 'Loading…' : 'Load more photos'}</button>}
+
+    {active && <div className="memory-lightbox" role="dialog" aria-modal="true" aria-label="Memory photo viewer" onClick={closeLightbox}>
+      <button type="button" className="memory-lightbox-close" onClick={closeLightbox} aria-label="Close"><X size={22} /></button>
+      {memories.length > 1 && <button type="button" className="memory-lightbox-nav memory-lightbox-nav--prev" onClick={(clickEvent) => { clickEvent.stopPropagation(); step(-1); }} aria-label="Previous photo"><ChevronLeft size={24} /></button>}
+      <figure className="memory-lightbox-frame" onClick={(clickEvent) => clickEvent.stopPropagation()}>
+        <img src={mediaUrl(active.imageUrl)} alt={active.caption || 'Approved event memory'} />
+        <figcaption>
+          <p>{active.caption || 'No caption'}</p>
+          <div className="memory-lightbox-meta"><small>{formatDateTime(active.createdAt)}</small>{reactionButtons(active)}</div>
+        </figcaption>
+      </figure>
+      {memories.length > 1 && <button type="button" className="memory-lightbox-nav memory-lightbox-nav--next" onClick={(clickEvent) => { clickEvent.stopPropagation(); step(1); }} aria-label="Next photo"><ChevronRight size={24} /></button>}
+    </div>}
   </div>;
 }
