@@ -13,7 +13,6 @@ import type { QuizCodeValidation, QuizLeaderboardEntry, QuizStart, QuizSubmitRes
 const QUESTION_COUNT = 5;
 const TIME_LIMIT_MS = 50_000;
 const ADVANCE_DELAY_MS = 350;
-const QUIZ_TEST_KEY = process.env.NEXT_PUBLIC_QUIZ_TEST_KEY;
 
 const QUIZ_GUIDE = `🎁 **Pre-order တင်ထားတဲ့သူတွေအတွက် Special Quiz ရှိတယ်နော်!** 🧠✨
 
@@ -134,20 +133,6 @@ export default function QuizPage() {
     finally { setChecking(false); }
   };
 
-  // Dev/testing only: mints a throwaway approved order + privilege code for
-  // this account server-side (gated by QUIZ_TEST_KEY) so the code-entry step
-  // can be skipped without a real preorder. Invisible unless
-  // NEXT_PUBLIC_QUIZ_TEST_KEY is configured for this build.
-  const skipCodeForTesting = async () => {
-    if (!auth || !QUIZ_TEST_KEY) return;
-    setChecking(true); setError('');
-    try {
-      const provisioned = await apiRequest<{ code: string }>('/quiz/test/provision-code', { method: 'POST', token: auth.token, headers: { 'x-quiz-test-key': QUIZ_TEST_KEY } });
-      setCode(provisioned.code);
-      await startQuiz(provisioned.code);
-    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Could not skip code entry.'); setChecking(false); }
-  };
-
   useEffect(() => {
     if (stage !== 'active') return;
     const timer = setInterval(() => {
@@ -186,7 +171,7 @@ export default function QuizPage() {
         : eventLoading ? <p>Checking whether the quiz is open…</p>
         : !featureEnabled ? <div className="closed-message"><p>The quiz is not open right now.</p><span>Organisers switch this on for fair day — approved orders and your privilege code are unaffected.</span></div>
         : <>
-        {stage === 'code' && <form onSubmit={checkCode} noValidate><p className="eyebrow">Enter your code</p><h2>Ready to play?</h2><label className="field"><span>Privilege code</span><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="FF-PRIV-..." required /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button button--full" disabled={checking}>{checking ? 'Checking…' : 'Check code'}</button>{QUIZ_TEST_KEY && <button type="button" className="button button--quiet" onClick={() => void skipCodeForTesting()} disabled={checking}>{checking ? 'Setting up…' : 'Skip code (test)'}</button>}</form>}
+        {stage === 'code' && <form onSubmit={checkCode} noValidate><p className="eyebrow">Enter your code</p><h2>Ready to play?</h2><label className="field"><span>Privilege code</span><input value={code} onChange={(e) => setCode(e.target.value)} placeholder="FF-PRIV-..." required /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button button--full" disabled={checking}>{checking ? 'Checking…' : 'Check code'}</button></form>}
 
         {stage === 'ready' && <div><p className="eyebrow">You&apos;re in</p><h2>Get ready</h2><p>You will have <strong>50 seconds</strong> to answer <strong>5 random questions</strong>, one at a time. The timer starts the moment you press start, so make sure you&apos;re ready before you begin.</p>{error && <p className="form-error" role="alert">{error}</p>}<button className="button button--full" onClick={() => void startQuiz(code.trim())} disabled={checking}>{checking ? 'Starting…' : 'Start quiz'}</button></div>}
 
