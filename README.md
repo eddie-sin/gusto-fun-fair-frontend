@@ -82,6 +82,7 @@ The public event name, physical date, time and place intentionally live in `lib/
 - `/stalls/[slug]` stall menu
 - `/crush-letters` anonymous letter submission
 - `/memories` memory photo upload
+- `/memory-booth-test` private event-day Memory Booth simulation using the real backend and R2 storage
 - `/login` and `/register`
 - `/cart`
 - `/orders` and `/orders/[id]`

@@ -6,6 +6,7 @@ import { Camera, Clock3, ImagePlus, Upload } from 'lucide-react';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/components/app-provider';
 import { FloatingGuide } from '@/components/floating-guide';
+import { MemoryGallery } from '@/components/memory-gallery';
 import { apiRequest, formatDateTime } from '@/lib/api';
 
 type SnapContext = { opensAt: string | null; closesAt: string | null; status: 'NOT_CONFIGURED' | 'UPCOMING' | 'OPEN' | 'CLOSED'; allowance?: number; used?: number; remaining?: number };
@@ -75,6 +76,7 @@ export default function MemoriesPage() {
       <button className="button button--full" onClick={upload} disabled={!open || !file || uploading || context?.remaining === 0}>{uploading ? 'Uploading…' : <><Upload size={17} /> Share this memory</>}</button>
     </>}</section>
   </div>
+    <div className="site-container memory-wall"><p className="eyebrow">The memory wall</p><h2>Moments from the fair</h2><p className="memory-wall-hint">Everyone can browse approved photos. Log in to react with a heart.</p><MemoryGallery token={auth?.token} /></div>
     <FloatingGuide icon={Camera} label="How Memory Booth works" title="Memory Booth" description="What the Memory Booth is about and when it opens." message={MEMORY_BOOTH_GUIDE} />
   </main>;
 }
