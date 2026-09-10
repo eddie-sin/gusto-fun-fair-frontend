@@ -2,7 +2,7 @@
 /* oxlint-disable react/react-compiler */
 
 import Link from 'next/link';
-import { Brain, CheckCircle2, Timer, Trophy, XCircle } from 'lucide-react';
+import { Brain, CheckCircle2, Crown, Medal, Sparkles, Timer, XCircle } from 'lucide-react';
 import { SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useApp } from '@/components/app-provider';
 import { FloatingGuide } from '@/components/floating-guide';
@@ -27,13 +27,36 @@ Pre-order တင်ပြီးရလာတဲ့ **Code** ကိုထည့်
 
 const formatSeconds = (ms: number) => (ms / 1000).toFixed(1);
 const optionLetter = (index: number) => String.fromCharCode(65 + index);
+const QUESTION_EMOJI = ['🧠', '🎯', '⚡', '🔥', '🏆'];
+
+const rankTierClass = (rank: number) =>
+  rank <= 3 ? `leaderboard-row--top leaderboard-row--rank${rank}` : rank <= 5 ? 'leaderboard-row--highlight' : '';
 
 function Leaderboard({ entries, loading }: { entries: QuizLeaderboardEntry[]; loading: boolean }) {
-  return <section className="leaderboard site-container"><p className="eyebrow">Fastest perfect scores</p><h2>Leaderboard</h2><p>The ten quickest candidates to answer all five questions correctly within the time limit.</p>
+  return <section className="leaderboard site-container"><p className="eyebrow">Fastest perfect scores</p><h2>🏆 Leaderboard</h2><p>The ten quickest candidates to answer all five questions correctly within the time limit.</p>
     {loading ? <p className="leaderboard-empty">Loading the leaderboard…</p> : entries.length === 0 ? <p className="leaderboard-empty">No one has completed the quiz in time yet. You could be first.</p> : <ol className="leaderboard-list">
-      {entries.map((entry) => <li key={entry.rank} className={`leaderboard-row ${entry.rank === 1 ? 'leaderboard-row--first' : ''}`}><span className="leaderboard-rank">{entry.rank === 1 ? <Trophy aria-hidden="true" size={20} /> : `#${entry.rank}`}</span><span>{entry.name}</span><span className="leaderboard-time">{formatSeconds(entry.elapsedMs)}s</span></li>)}
+      {entries.map((entry, index) => <li key={entry.rank} className={`leaderboard-row ${rankTierClass(entry.rank)}`} style={{ animationDelay: `${index * 70}ms` }}>
+        <span className="leaderboard-rank">{entry.rank === 1 ? <span className="leaderboard-medal"><Crown aria-hidden="true" size={18} /></span> : entry.rank <= 3 ? <span className="leaderboard-medal"><Medal aria-hidden="true" size={16} /></span> : `#${entry.rank}`}</span>
+        <span className="leaderboard-avatar" aria-hidden="true">{entry.name.trim().charAt(0).toUpperCase() || '?'}</span>
+        <span className="leaderboard-name">{entry.name}</span>
+        <span className="leaderboard-time">{formatSeconds(entry.elapsedMs)}s</span>
+      </li>)}
     </ol>}
   </section>;
+}
+
+function TimerRing({ remainingMs }: { remainingMs: number }) {
+  const radius = 26;
+  const circumference = 2 * Math.PI * radius;
+  const ratio = Math.max(0, Math.min(1, remainingMs / TIME_LIMIT_MS));
+  const tier = remainingMs <= 10_000 ? 'is-critical' : remainingMs <= 20_000 ? 'is-caution' : '';
+  return <div className={`quiz-timer-ring ${tier}`} role="timer" aria-label={`${formatSeconds(remainingMs)} seconds remaining`}>
+    <svg viewBox="0 0 64 64" width="64" height="64">
+      <circle className="quiz-timer-ring__track" cx="32" cy="32" r={radius} />
+      <circle className="quiz-timer-ring__fill" cx="32" cy="32" r={radius} strokeDasharray={circumference} strokeDashoffset={circumference * (1 - ratio)} />
+    </svg>
+    <span className="quiz-timer-ring__value">{formatSeconds(remainingMs)}s</span>
+  </div>;
 }
 
 export default function QuizPage() {
@@ -169,7 +192,7 @@ export default function QuizPage() {
 
         {stage === 'active' && <p className="quiz-waiting">The question is open in the popup — keep an eye on the timer.</p>}
 
-        {stage === 'result' && result && <div className={`quiz-result ${result.passed ? 'quiz-result--pass' : ''}`}>{result.passed ? <CheckCircle2 aria-hidden="true" size={28} /> : <XCircle aria-hidden="true" size={28} />}<h3>{result.passed ? 'Perfect score!' : result.timedOut ? 'Time ran out' : 'Not quite'}</h3><p>You scored <strong>{result.score} / {QUESTION_COUNT}</strong> in {formatSeconds(result.elapsedMs)} seconds ({result.elapsedMs.toLocaleString()} ms).</p>{result.timedOut && !result.passed && <p>Your answers were scored, but the 50-second limit had already passed, so this attempt doesn&apos;t qualify for the leaderboard.</p>}{result.passed && <p>You made the leaderboard requirement — check below to see where you rank.</p>}
+        {stage === 'result' && result && <div className={`quiz-result ${result.passed ? 'quiz-result--pass' : ''}`}><span className="quiz-result-icon">{result.passed ? <CheckCircle2 aria-hidden="true" size={28} /> : <XCircle aria-hidden="true" size={28} />}</span><h3>{result.passed && <Sparkles aria-hidden="true" size={20} className="quiz-result-sparkle" />}{result.passed ? 'Perfect score!' : result.timedOut ? 'Time ran out' : 'Not quite'}</h3><p>You scored <strong>{result.score} / {QUESTION_COUNT}</strong> in {formatSeconds(result.elapsedMs)} seconds ({result.elapsedMs.toLocaleString()} ms).</p>{result.timedOut && !result.passed && <p>Your answers were scored, but the 50-second limit had already passed, so this attempt doesn&apos;t qualify for the leaderboard.</p>}{result.passed && <p>You made the leaderboard requirement — check below to see where you rank.</p>}
           {result.results && result.results.length > 0 && <ol className="quiz-result-breakdown">
             {result.results.map((entry, index) => <li key={entry.questionId} className={`quiz-result-row ${entry.correct ? 'is-correct' : 'is-wrong'}`}>
               <span className="quiz-result-row__icon">{entry.correct ? <CheckCircle2 aria-hidden="true" size={18} /> : <XCircle aria-hidden="true" size={18} />}</span>
@@ -186,11 +209,13 @@ export default function QuizPage() {
 
     <Dialog open={stage === 'active'} onOpenChange={() => { /* the quiz cannot be dismissed early; it closes itself once submitted */ }}>
       <DialogContent className="quiz-dialog" showCloseButton={false}>
-        <DialogHeader><DialogTitle>Question {currentIndex + 1} of {QUESTION_COUNT}</DialogTitle><DialogDescription>Pick an option — the next question opens automatically.</DialogDescription></DialogHeader>
-        <div className={`quiz-timer ${remainingMs <= 10_000 ? 'quiz-timer--warning' : ''}`}><span>Time remaining</span><strong>{formatSeconds(remainingMs)}s</strong></div>
+        <div className="quiz-dialog-top">
+          <DialogHeader><span className="quiz-question-badge" aria-hidden="true">{QUESTION_EMOJI[currentIndex] ?? '❓'}</span><DialogTitle>Question {currentIndex + 1} of {QUESTION_COUNT}</DialogTitle><DialogDescription>Pick an option — the next question opens automatically.</DialogDescription></DialogHeader>
+          <TimerRing remainingMs={remainingMs} />
+        </div>
         <ol className="quiz-progress-dots" aria-hidden="true">{Array.from({ length: QUESTION_COUNT }, (_, index) => <li key={index} className={index < currentIndex ? 'is-done' : index === currentIndex ? 'is-current' : ''} />)}</ol>
-        {activeQuestion && <div className="quiz-question"><h3>{activeQuestion.question}</h3><div className="quiz-options" role="radiogroup" aria-label={activeQuestion.question}>
-          {activeQuestion.options.map((option, optionIndex) => <button type="button" key={optionIndex} className={`quiz-option ${flashIndex === optionIndex ? 'is-selected' : ''}`} onClick={() => chooseAnswer(optionIndex)} disabled={flashIndex !== null}><span className="quiz-option-marker">{optionLetter(optionIndex)}</span>{option}</button>)}
+        {activeQuestion && <div className="quiz-question" key={currentIndex}><h3>{activeQuestion.question}</h3><div className="quiz-options" role="radiogroup" aria-label={activeQuestion.question}>
+          {activeQuestion.options.map((option, optionIndex) => <button type="button" key={optionIndex} className={`quiz-option ${flashIndex === optionIndex ? 'is-selected' : ''}`} style={{ animationDelay: `${optionIndex * 60}ms` }} onClick={() => chooseAnswer(optionIndex)} disabled={flashIndex !== null}><span className="quiz-option-marker">{optionLetter(optionIndex)}</span>{option}</button>)}
         </div></div>}
       </DialogContent>
     </Dialog>
